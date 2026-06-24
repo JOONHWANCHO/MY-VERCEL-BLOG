@@ -1,0 +1,31 @@
+:root {
+    --primary: #FF8A3D; /* 당근 주황색 */
+    --bg: #f8f9fa;
+    --text: #212529;
+}
+
+body { margin: 0; font-family: 'Pretendard', sans-serif; background-color: var(--bg); color: var(--text); }
+.container { max-width: 1024px; margin: 0 auto; padding: 0 20px; }
+
+/* Header */
+.navbar { background: white; border-bottom: 1px solid #eee; padding: 15px 0; position: sticky; top: 0; z-index: 100; }
+.logo { font-size: 1.5rem; font-weight: bold; color: var(--primary); text-decoration: none; }
+
+/* Hero Banner */
+.hero-banner { background: #fff1e6; padding: 60px 0; border-bottom: 1px solid #ffe0cc; }
+.hero-banner h1 { font-size: 2.5rem; margin-bottom: 10px; }
+
+/* Card UI */
+.section { padding: 40px 0; }
+.section-title { font-size: 1.4rem; margin-bottom: 20px; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 20px; }
+
+.card { background: white; border-radius: 12px; border: 1px solid #eaeaea; overflow: hidden; cursor: pointer; transition: 0.2s; }
+.card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+.card-img { width: 100%; height: 180px; background: #eee; object-fit: cover; }
+.card-content { padding: 15px; }
+.card-title { font-weight: bold; margin-bottom: 8px; font-size: 1.1rem; }
+.card-date { color: #888; font-size: 0.8rem; }
+
+/* Footer */
+.footer { background: #fff; padding: 40px 0; border-top: 1px solid #eee; text-align: center; color: #888; }
