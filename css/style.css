@@ -1,0 +1,99 @@
+:root {
+    --primary-color: #333;
+    --background-color: #f9f9f9;
+    --card-background: #ffffff;
+    --border-color: #eaeaea;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--background-color);
+    color: var(--primary-color);
+    margin: 0;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    background: var(--card-background);
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 30px;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+header a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.loading {
+    text-align: center;
+    color: #888;
+    padding: 50px 0;
+}
+
+/* 글 목록 스타일 */
+.post-list {
+    list-style: none;
+    padding: 0;
+}
+
+.post-item {
+    background: var(--card-background);
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.post-item h2 {
+    margin-top: 0;
+    font-size: 1.3rem;
+}
+
+.post-item h2 a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+.post-item h2 a:hover {
+    text-decoration: underline;
+}
+
+/* 글 상세 스타일 */
+.post-detail {
+    background: var(--card-background);
+    padding: 30px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.post-detail h1 {
+    font-size: 2rem;
+    margin-top: 0;
+}
+
+.post-meta {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+.back-btn {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #0066cc;
+    text-decoration: none;
+}
