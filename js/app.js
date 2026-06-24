@@ -20,7 +20,8 @@ async function fetchPosts() {
         const data = JSON.parse(jsonString);
         
         const rows = data.table.rows;
-        const cols = data.table.cols.map(c => c.label.toLowerCase().trim()); // id, title, content, date, category, image_url
+        // 구글 시트의 모든 헤더 컬럼명 추출 (id, title, content, date, category, image_url, link 등)
+        const cols = data.table.cols.map(c => c.label.toLowerCase().trim()); 
 
         // 구글 시트 행 데이터를 객체 배열로 매핑
         globalPosts = rows.map(row => {
@@ -107,10 +108,9 @@ function createCardHtml(post) {
     `;
 }
 
-// 렌더링: 글 상세 화면
+// 렌더링: 글 상세 화면 및 링크 이동 버튼 기능 추가
 function renderPostDetail(id) {
     const appContainer = document.getElementById('app');
-    // 구글 시트 내 ID 데이터 타입 유연성을 위해 느슨한 비교(==) 적용
     const post = globalPosts.find(p => p.id == id);
 
     if (!post) {
@@ -127,7 +127,19 @@ function renderPostDetail(id) {
     const imageUrl = post.image_url && post.image_url.startsWith('http') ? post.image_url : fallbackImg;
     const formattedContent = post.content ? post.content.replace(/\n/g, '<br>') : '';
 
-    // 상세페이지 UI 주입 (style.css에 맞춤 설계)
+    // 구글 시트에 link 값이 존재할 때만 생성할 버튼 HTML 컴포넌트
+    let linkButtonHtml = '';
+    if (post.link && post.link.startsWith('http')) {
+        linkButtonHtml = `
+            <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; text-align: center;">
+                <a href="${post.link}" target="_blank" rel="noopener noreferrer" class="action-btn">
+                    🔗 링크 바로가기
+                </a>
+            </div>
+        `;
+    }
+
+    // 상세페이지 UI 주입
     appContainer.innerHTML = `
         <div class="container" style="padding: 40px 20px; max-width: 700px;">
             <a href="/" class="back-btn" style="display:inline-block; margin-bottom:20px; color:#FF8A3D; text-decoration:none; font-weight:bold;" onclick="routeTo(event, '/')">← 동네목록으로</a>
@@ -137,14 +149,16 @@ function renderPostDetail(id) {
                     <span style="background: #fff1e6; color: #FF8A3D; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; font-weight: bold;">${post.category || '동네소식'}</span>
                     <h1 style="font-size: 1.8rem; margin: 15px 0 10px 0; line-height: 1.4;">${post.title}</h1>
                     <div style="color: #888; font-size: 0.85rem; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px;">작성일: ${post.date || '오늘'}</div>
-                    <div style="font-size: 1.05rem; line-height: 1.7; color: #333; word-break: break-word;">${formattedContent}</div>
+                    <div style="font-size: 1.05rem; line-height: 1.7; color: #333; word-break: break-word; margin-bottom: 10px;">${formattedContent}</div>
+                    
+                    ${linkButtonHtml}
                 </div>
             </article>
         </div>
     `;
 }
 
-// SPA 방식 주소 이동 함수 (새로고침 없이 상태 변경 후 렌더링 호출)
+// SPA 방식 주소 이동 함수
 function routeTo(event, path) {
     if (event) event.preventDefault();
     window.history.pushState({}, '', path);
@@ -156,15 +170,11 @@ window.addEventListener('popstate', handleRouting);
 
 // 초기 애플리케이션 진입점
 window.addEventListener('DOMContentLoaded', async () => {
-    // 1. 초기 로딩 시 index.html에 적어둔 배너, 카테고리 뼈대 구조를 문자열로 기억/백업
     const appContainer = document.getElementById('app');
     if (appContainer) {
         homeHtmlTemplate = appContainer.innerHTML;
     }
 
-    // 2. 구글 시트 원격 데이터 1회 전역 로드
     await fetchPosts();
-    
-    // 3. 현재 주소창 상태 분석해서 올바른 뷰 표출
     handleRouting();
 });
