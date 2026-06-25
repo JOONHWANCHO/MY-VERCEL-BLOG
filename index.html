@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>노리야 키즈 | 동네 액티비티 총집합</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=b78a133ce4df6122259f06ec1c31f389&libraries=services"></script>
     <link rel="stylesheet" href="/css/style.css">
+    
 </head>
 <body>
     <header class="navbar">
@@ -28,6 +30,14 @@
                 <div class="hero-badge-img">🎁</div>
             </div>
             <!-- <div id="top-banner-carousel"></div> -->
+        </section>
+
+        <section class="container near-map-section">
+            <h3 class="map-section-title">📍 내 위치에서 <span>가장 가까운 액티비티</span></h3>
+            <div id="near-map"></div>
+            <div id="near-recommend-spot">
+                <div class="map-loading-msg">현재 위치와 액티비티 거리를 계산하고 있습니다...</div>
+            </div>
         </section>
 
         <section class="container" id="stamp-container"></section>

@@ -501,3 +501,112 @@ document.addEventListener('DOMContentLoaded', () => {
     initBannerCarousel();
     // ... 기존 데이터 페치 및 렌더링 함수들 ...
 });
+
+
+// ==========================================================================
+// [독립 실행형 엔진] 내 위치 기준 가장 가까운 장소 추적 및 지도 바인딩 스크립트
+// ==========================================================================
+(function() {
+    // 💡 [필수 설정] 기존 코드에서 구글 시트 데이터가 저장되는 배열 변수명을 적어주세요.
+    // 만약 기존 변수명이 posts 라면 = posts; 로 변경하시면 됩니다.
+    const POSTS_ARRAY = globalPosts; 
+
+    // 앱이 실행되고 데이터가 바인딩되는 타이밍을 캐치하기 위한 관찰 스케줄러 가동
+    const checkInterval = setInterval(() => {
+        if (typeof kakao !== 'undefined' && POSTS_ARRAY && POSTS_ARRAY.length > 0) {
+            clearInterval(checkInterval);
+            runNearLocationEngine(POSTS_ARRAY);
+        }
+    }, 300);
+
+    function runNearLocationEngine(posts) {
+        const mapContainer = document.getElementById('near-map');
+        const recommendContainer = document.getElementById('near-recommend-spot');
+        if (!mapContainer || !recommendContainer) return;
+
+        if (!navigator.geolocation) {
+            recommendContainer.innerHTML = `<div class="map-loading-msg">위치 서비스를 지원하지 않는 브라우저입니다.</div>`;
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            const userLat = position.coords.latitude;  
+            const userLng = position.coords.longitude; 
+
+            const geocoder = new kakao.maps.services.Geocoder();
+            const distancePromises = posts.map(post => {
+                return new Promise((resolve) => {
+                    // 구글 시트 헤더 명칭에 따라 post.address 또는 post.주소 등으로 맞춰주세요.
+                    const address = post.address || post.Address || post.주소; 
+                    if (!address) return resolve(null);
+                    
+                    geocoder.addressSearch(address, function(result, status) {
+                        if (status === kakao.maps.services.Status.OK) {
+                            const spotLat = parseFloat(result[0].y);
+                            const spotLng = parseFloat(result[0].x);
+                            const distance = calculateHaversine(userLat, userLng, spotLat, spotLng);
+                            resolve({ ...post, lat: spotLat, lng: spotLng, distance: distance });
+                        } else {
+                            resolve(null); 
+                        }
+                    });
+                });
+            });
+
+            const calculatedSpots = (await Promise.all(distancePromises)).filter(spot => spot !== null);
+
+            if (calculatedSpots.length === 0) {
+                recommendContainer.innerHTML = `<div class="map-loading-msg">주소가 올바르게 등록된 액티비티가 없습니다.</div>`;
+                return;
+            }
+
+            // 가장 가까운 순서대로 정렬 후 최단 거리 spot 추출
+            calculatedSpots.sort((a, b) => a.distance - b.distance);
+            const closestSpot = calculatedSpots[0];
+
+            // 카카오 지도 레이아웃 그리기
+            const spotPosition = new kakao.maps.LatLng(closestSpot.lat, closestSpot.lng);
+            const mapOption = { center: spotPosition, level: 5 };
+            const map = new kakao.maps.Map(mapContainer, mapOption);
+
+            // 마커 및 말풍선 팝업
+            const marker = new kakao.maps.Marker({ position: spotPosition, map: map });
+            const infowindow = new kakao.maps.InfoWindow({
+                content: `<div style="padding:6px; font-size:11px; font-weight:700; color:#222; text-align:center; width:130px; border:none;">${closestSpot.title || closestSpot.제목}</div>`
+            });
+            infowindow.open(map, marker);
+
+            // 하단 추천 미니 카드 UI 업데이트
+            const distanceText = closestSpot.distance < 1 
+                ? `${Math.round(closestSpot.distance * 1000)}m 앞` 
+                : `${closestSpot.distance.toFixed(1)}km 근처`;
+
+            const imgUrl = closestSpot.image_url || closestSpot.이미지 || 'https://images.unsplash.com/photo-1489710437720-ebb67ec84dd2?w=100&q=80';
+            const spotId = closestSpot.id || closestSpot.ID;
+
+            recommendContainer.innerHTML = `
+                <div class="near-recommend-card" onclick="location.search = '?id=${spotId}'">
+                    <img src="${imgUrl}" alt="추천 상품 이미지">
+                    <div class="info">
+                        <div class="distance-tag">⚡ 지금 내 위치에서 ${distanceText}</div>
+                        <div class="place-name">${closestSpot.title || closestSpot.제목}</div>
+                    </div>
+                </div>
+            `;
+
+        }, (error) => {
+            console.error(error);
+            recommendContainer.innerHTML = `<div class="map-loading-msg">위치 권한을 허용하시면 가장 가까운 장소를 추천해 드려요.</div>`;
+        });
+    }
+
+    // 하버사인 거리 계산 수식
+    function calculateHaversine(lat1, lon1, lat2, lon2) {
+        const R = 6371; 
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))); 
+    }
+})();
