@@ -3,42 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>당근마켓 스타일 커뮤니티</title>
+    <title>야놀자 키즈 | 동네 액티비티 총집합</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <header class="navbar">
-        <div class="container">
-            <a href="/" class="logo" onclick="routeTo(event, '/')">🥕 당근커뮤니티</a>
+        <div class="container navbar-content">
+            <a href="/" class="logo" onclick="routeTo(event, '/')">⚡ yanolja <span class="logo-sub">kids</span></a>
+            <div class="header-search-bar" onclick="alert('검색 기능은 준비 중입니다.')">
+                <span>📍 어디로 아이와 함께 떠날까요?</span>
+            </div>
         </div>
     </header>
 
     <div id="app">
         <section class="hero-banner">
-            <div class="container">
-                <h1>우리 동네의<br>모든 소식을 한눈에!</h1>
-                <p>이웃과 나누는 따뜻한 이야기</p>
+            <div class="container hero-content">
+                <div class="hero-text">
+                    <span class="badge-accent">초특가 야놀자 주말특가</span>
+                    <h1>이번 주말 아이 액티비티<br><span class="highlight">최저가 예약</span></h1>
+                </div>
+                <div class="hero-badge-img">🎁</div>
+            </div>
+        </section>
+
+        <section class="container" id="stamp-container"></section>
+
+        <section class="container category-section">
+            <div class="category-grid">
+                <div class="category-item" onclick="alert('준비 중인 카테고리입니다.')">
+                    <div class="category-icon-wrap" style="background-color: #fff0f6;">🎠</div>
+                    <span>테마파크</span>
+                </div>
+                <div class="category-item" onclick="alert('준비 중인 카테고리입니다.')">
+                    <div class="category-icon-wrap" style="background-color: #e6f7ff;">🏊</div>
+                    <span>키즈풀빌라</span>
+                </div>
+                <div class="category-item" onclick="alert('준비 중인 카테고리입니다.')">
+                    <div class="category-icon-wrap" style="background-color: #f6ffed;">🌳</div>
+                    <span>자연/체험</span>
+                </div>
+                <div class="category-item" onclick="alert('준비 중인 카테고리입니다.')">
+                    <div class="category-icon-wrap" style="background-color: #fff7e6;">🎨</div>
+                    <span>원데이클래스</span>
+                </div>
+                <div class="category-item" onclick="alert('준비 중인 카테고리입니다.')">
+                    <div class="category-icon-wrap" style="background-color: #feebec;">🦕</div>
+                    <span>박물관/전시</span>
+                </div>
             </div>
         </section>
 
         <section class="section">
             <div class="container">
-                <h2 class="section-title">🔥 지금 인기 있는 글</h2>
+                <div class="section-title-wrap">
+                    <h2 class="section-title">🔥 실시간 예약 급상승 액티비티</h2>
+                    <span class="section-desc">지금 가장 많은 부모들이 선택하고 있어요</span>
+                </div>
                 <div id="trending-posts" class="card-grid"></div>
             </div>
         </section>
 
+        <section class="promo-banner-section">
+            <div class="container">
+                <div class="promo-banner" onclick="alert('이벤트가 마감되었습니다.')">
+                    <div>🎉 <b>첫 결제 시 10,000원 즉시 할인 쿠폰</b>팩 발급 중!</div>
+                    <div class="promo-go">받으러 가기 ➡️</div>
+                </div>
+            </div>
+        </section>
+
         <section class="section">
             <div class="container">
-                <h2 class="section-title">🏘️ 실시간 동네 소식</h2>
+                <div class="section-title-wrap">
+                    <h2 class="section-title">✨ 새로 등록된 동네 오픈 특가</h2>
+                    <span class="section-desc">놓치면 후회하는 신규 라인업</span>
+                </div>
                 <div id="recent-posts" class="card-grid"></div>
             </div>
         </section>
     </div>
 
-    <footer class="footer">
+    <nav class="bottom-nav">
+        <div class="bottom-nav-item" onclick="routeTo(event, '/')">
+            <div class="nav-icon">🏠</div>
+            <span>홈</span>
+        </div>
+        <div class="bottom-nav-item" onclick="routeTo(event, '/wishes')">
+            <div class="nav-icon">❤️</div>
+            <span>찜 목록</span>
+        </div>
+    </nav>
+
+    <footer class="footer" style="padding-bottom: 90px;">
         <div class="container">
-            <p>© 2026 Orange Community. All rights reserved.</p>
+            <p>(주)야놀자키즈랩 | 서울시 강남구 테헤란로</p>
+            <p>© 2026 yanolja kids. All rights reserved.</p>
         </div>
     </footer>
 

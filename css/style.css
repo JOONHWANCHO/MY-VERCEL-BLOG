@@ -1,56 +1,154 @@
 :root {
-    --primary: #FF8A3D; /* 당근 주황색 */
-    --bg: #f8f9fa;
-    --text: #212529;
+    --primary: #E61C5D; /* 야놀자 메인 시그니처 핑크 */
+    --primary-hover: #C9144D;
+    --accent: #DE2E6A;
+    --bg: #F7F7F9; /* 깔끔하고 정돈된 야놀자식 연회색 바탕 */
+    --text: #1A1A1A;
+    --text-muted: #8F8F8F;
+    --border-radius-sm: 8px;
+    --border-radius-md: 14px;
 }
 
-body { margin: 0; font-family: 'Pretendard', sans-serif; background-color: var(--bg); color: var(--text); }
-.container { max-width: 1024px; margin: 0 auto; padding: 0 20px; }
+body { 
+    margin: 0; 
+    font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", Dotum, sans-serif; 
+    background-color: var(--bg); 
+    color: var(--text); 
+    -webkit-font-smoothing: antialiased;
+}
+.container { max-width: 960px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; }
 
-/* Header */
-.navbar { background: white; border-bottom: 1px solid #eee; padding: 15px 0; position: sticky; top: 0; z-index: 100; }
-.logo { font-size: 1.5rem; font-weight: bold; color: var(--primary); text-decoration: none; }
+/* 야놀자 스타일 상단 헤더 & 검색 바 구조 */
+.navbar { background: white; border-bottom: 1px solid #EDEDED; padding: 12px 0; position: sticky; top: 0; z-index: 100; }
+.navbar-content { display: flex; align-items: center; gap: 20px; }
+.logo { font-size: 1.5rem; font-weight: 900; color: var(--primary); text-decoration: none; letter-spacing: -1px; }
+.logo-sub { color: #333; font-weight: 500; font-size: 1.1rem; }
 
-/* Hero Banner */
-.hero-banner { background: #fff1e6; padding: 60px 0; border-bottom: 1px solid #ffe0cc; }
-.hero-banner h1 { font-size: 2.5rem; margin-bottom: 10px; }
+.header-search-bar {
+    flex-grow: 1;
+    background: #F2F3F5;
+    border-radius: 24px;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    color: #666;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
 
-/* Card UI */
-.section { padding: 40px 0; }
-.section-title { font-size: 1.4rem; margin-bottom: 20px; }
-.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 20px; }
-
-.card { background: white; border-radius: 12px; border: 1px solid #eaeaea; overflow: hidden; cursor: pointer; transition: 0.2s; }
-.card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-.card-img { width: 100%; height: 180px; background: #eee; object-fit: cover; }
-.card-content { padding: 15px; }
-.card-title { font-weight: bold; margin-bottom: 8px; font-size: 1.1rem; }
-.card-date { color: #888; font-size: 0.8rem; }
-
-/* Footer */
-.footer { background: #fff; padding: 40px 0; border-top: 1px solid #eee; text-align: center; color: #888; }
-
-/* 링크 이동 버튼 스타일 (당근 스타일 적용) */
-.action-btn {
-    display: inline-block;
-    width: 100%;
-    max-width: 280px;
-    background-color: var(--primary);
+/* 야놀자 시그니처 그라데이션 배너 */
+.hero-banner { 
+    background: linear-gradient(135deg, #E61C5D 0%, #FF5E89 100%); 
     color: white;
-    text-decoration: none;
-    padding: 14px 20px;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: bold;
-    box-sizing: border-box;
-    transition: background-color 0.2s, transform 0.1s;
-    box-shadow: 0 4px 6px rgba(255, 138, 61, 0.2);
+    padding: 40px 0; 
+    overflow: hidden; 
 }
+.hero-content { display: flex; justify-content: space-between; align-items: center; }
+.badge-accent { display: inline-block; background: rgba(0, 0, 0, 0.2); color: #FFF; font-size: 0.75rem; font-weight: bold; padding: 3px 8px; border-radius: 4px; margin-bottom: 8px; }
+.hero-banner h1 { font-size: 2.1rem; margin: 0; line-height: 1.3; font-weight: 800; letter-spacing: -0.5px; }
+.hero-banner h1 .highlight { color: #FFFDE7; }
+.hero-badge-img { font-size: 4rem; animation: bounce 3s infinite ease-in-out; }
 
-.action-btn:hover {
-    background-color: #e6732e; /* 호버 시 약간 어두운 오렌지 */
+/* 라운드 서클 퀵 아이콘 메뉴 */
+.category-section { padding: 25px 0 10px 0; }
+.category-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.category-item { text-align: center; cursor: pointer; }
+.category-icon-wrap { 
+    width: 56px; 
+    height: 56px; 
+    margin: 0 auto 8px auto; 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 1.6rem; 
+    transition: transform 0.2s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
 }
+.category-item:hover .category-icon-wrap { transform: scale(1.08); }
+.category-item span { font-size: 0.8rem; font-weight: 600; color: #444; }
 
-.action-btn:active {
-    transform: scale(0.98); /* 클릭 액션 피드백 */
+/* 섹션 타이틀 컴포넌트 */
+.section { padding: 20px 0; }
+.section-title-wrap { margin-bottom: 16px; }
+.section-title { font-size: 1.25rem; margin: 0 0 2px 0; font-weight: 800; letter-spacing: -0.3px; color: #1A1A1A; }
+.section-desc { font-size: 0.85rem; color: var(--text-muted); }
+
+/* 야놀자 스타일 리스트 카드 테마 (사진 비율 강화, 하단 정돈) */
+.card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+@media (min-width: 768px) { .card-grid { grid-template-columns: repeat(4, 1fr); } }
+
+.card { 
+    background: white; 
+    border-radius: var(--border-radius-md); 
+    overflow: hidden; 
+    cursor: pointer; 
+    transition: transform 0.2s; 
+    position: relative; 
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
 }
+.card:hover { transform: translateY(-4px); }
+.card-img { width: 100%; height: 150px; object-fit: cover; display: block; }
+.card-content { padding: 12px; }
+.card-title { font-weight: 700; margin-bottom: 6px; font-size: 0.95rem; line-height: 1.4; color: #333; height: 2.6rem; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.card-date { color: var(--primary); font-size: 0.85rem; font-weight: 700; } /* 예약 마감일/날짜 강조 효과 */
+
+/* 우측 상단 찜하기 하트 배지 컴포넌트 */
+.wish-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    font-size: 1.4rem;
+    z-index: 10;
+    cursor: pointer;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    transition: transform 0.1s;
+}
+.wish-badge:hover { transform: scale(1.15); }
+
+/* 락인 기능 1: 야놀자 코인 획득형 출석 스탬프 박스 */
+.stamp-box { background: white; border: 1px solid #EAEAEA; border-radius: var(--border-radius-md); padding: 18px; margin: 16px auto; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+.stamp-box h4 { margin: 0 0 4px 0; color: var(--primary); font-size: 1rem; font-weight: 800; }
+.stamp-box p { margin: 0 0 14px 0; font-size: 0.8rem; color: #666; }
+.stamp-grid { display: flex; gap: 10px; }
+.stamp { font-size: 1.5rem; background: #F2F3F5; border-radius: 50%; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; filter: grayscale(100%); opacity: 0.4; }
+.stamp.active { filter: grayscale(0%); opacity: 1; background: #FFF0F6; animation: pop 0.3s ease; }
+
+/* 야놀자 스타일 특가 프로모션 띠 배너 */
+.promo-banner-section { padding: 10px 0; }
+.promo-banner { background: #1A1A1A; color: white; padding: 14px 20px; border-radius: var(--border-radius-sm); font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+.promo-go { color: #FFD43B; font-weight: bold; }
+
+/* 야놀자 고유 하단 고정형 네비게이션 바 컴포넌트 */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.96);
+    border-top: 1px solid #EDEDED;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.03);
+}
+.bottom-nav-item { text-align: center; cursor: pointer; flex-grow: 1; padding: 6px 0; }
+.nav-icon { font-size: 1.2rem; margin-bottom: 2px; }
+.bottom-nav-item span { font-size: 0.75rem; font-weight: 600; color: #555; }
+.bottom-nav-item:hover span { color: var(--primary); }
+
+/* 상세 페이지 버튼 커스텀 컴포넌트 */
+.action-btn { display: inline-block; flex-grow: 1; background-color: var(--primary); color: white; text-decoration: none; padding: 14px 20px; border-radius: var(--border-radius-sm); font-size: 1rem; font-weight: bold; text-align: center; transition: background 0.2s; }
+.action-btn:hover { background-color: var(--primary-hover); }
+.wish-btn { background: #FFF; border: 1px solid #E61C5D; color: #E61C5D; border-radius: var(--border-radius-sm); padding: 14px 20px; font-size: 1rem; font-weight: bold; cursor: pointer; }
+.wish-btn.active { background: #FFF0F6; }
+
+.footer { background: #FFF; border-top: 1px solid #EDEDED; text-align: center; color: #999; font-size: 0.8rem; padding: 30px 0; }
+.footer p { margin: 4px 0; }
+
+@keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+@keyframes pop { 0% { transform: scale(0.7); } 100% { transform: scale(1); } }

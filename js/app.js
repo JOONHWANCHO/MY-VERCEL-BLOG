@@ -1,29 +1,21 @@
-// 1. 본인의 구글 시트 정보로 변경하세요.
+// 본인의 구글 스프레드시트 고유 ID 및 시트명을 입력하세요
 const SPREADSHEET_ID = '1_4ivDTckWs1T0RiN3O5Hao6-LwwQevm1tJZ10AUONps'; 
-const SHEET_NAME = 'Sheet1'; // 혹은 '시트1'
+const SHEET_NAME = 'Sheet1'; 
 const GOOGLE_SHEET_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME}`;
 
-// 글로벌 데이터 저장소
 let globalPosts = [];
-
-// 오리지널 메인 레이아웃 백업 (상세 페이지에서 홈으로 돌아올 때 복원용)
 let homeHtmlTemplate = '';
 
-// 구글 시트 JSON 파싱 및 데이터 표준화
 async function fetchPosts() {
     try {
         const response = await fetch(GOOGLE_SHEET_URL);
         const text = await response.text();
-        
-        // 구글 시트 gviz/tq API 응답에서 순수 JSON 부분만 추출
         const jsonString = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
         const data = JSON.parse(jsonString);
         
         const rows = data.table.rows;
-        // 구글 시트의 모든 헤더 컬럼명 추출 (id, title, content, date, category, image_url, link 등)
         const cols = data.table.cols.map(c => c.label.toLowerCase().trim()); 
 
-        // 구글 시트 행 데이터를 객체 배열로 매핑
         globalPosts = rows.map(row => {
             const item = {};
             row.c.forEach((cell, index) => {
@@ -32,125 +24,177 @@ async function fetchPosts() {
             });
             return item;
         });
-
         return globalPosts;
     } catch (error) {
-        console.error('구글 시트 데이터를 가져오는 데 실패했습니다:', error);
-        const appContainer = document.getElementById('app');
-        if (appContainer) {
-            appContainer.innerHTML = '<div class="loading">데이터 로드 실패. 구글 시트의 공개 및 헤더 설정을 확인하세요.</div>';
-        }
+        console.error('데이터 수집 실패:', error);
         return [];
     }
 }
 
-// 라우터 처리기 (핵심 제어 로직)
-function handleRouting() {
-    const path = window.location.pathname;
-    const decodedPath = decodeURIComponent(path); 
-    const appContainer = document.getElementById('app');
+function handleStampSystem() {
+    const today = new Date().toISOString().split('T')[0];
+    let stampData = JSON.parse(localStorage.getItem('kid_stamps')) || { lastDate: '', count: 0 };
 
-    // 패턴 검사: /post/글번호
-    const postRouteMatch = decodedPath.match(/^\/post\/(\d+)$/);
+    if (stampData.lastDate !== today) {
+        stampData.count = stampData.count >= 5 ? 1 : stampData.count + 1;
+        stampData.lastDate = today;
+        localStorage.setItem('kid_stamps', JSON.stringify(stampData));
+    }
 
-    if (postRouteMatch) {
-        const postId = postRouteMatch[1];
-        renderPostDetail(postId);
-    } else if (decodedPath === '/' || decodedPath === '/index.html') {
-        renderHomeLayout();
-    } else {
-        appContainer.innerHTML = `
-            <div class="container" style="padding: 100px 20px; text-align: center;">
-                <h2>404 - 페이지를 찾을 수 없습니다.</h2>
-                <a href="/" class="back-btn" onclick="routeTo(event, '/')">홈으로 돌아가기</a>
+    const stampContainer = document.getElementById('stamp-container');
+    if (stampContainer) {
+        let stampIcons = '';
+        for (let i = 1; i <= 5; i++) {
+            stampIcons += (i <= stampData.count) ? `<span class="stamp active">⚡</span>` : `<span class="stamp">⚪</span>`;
+        }
+        stampContainer.innerHTML = `
+            <div class="stamp-box">
+                <h4>⚡ 야놀자 락인 보너스 스탬프 (${stampData.count}/5)</h4>
+                <p>매일 앱 방문 시 야놀자 키즈 코인이 충전되며 연속 완주 시 히든 쿠폰이 발급됩니다.</p>
+                <div class="stamp-grid">${stampIcons}</div>
             </div>
         `;
     }
 }
 
-// 렌더링: 홈 화면 레이아웃 복원 및 카테고리별 카드 배치
-function renderHomeLayout() {
-    const appContainer = document.getElementById('app');
+function toggleWishlist(postId, event) {
+    if (event) event.stopPropagation();
+    let wishList = JSON.parse(localStorage.getItem('kid_wishlist')) || [];
+    const index = wishList.indexOf(String(postId));
     
-    // 처음에 백업해둔 메인 구조(배너 및 카테고리 섹션들)를 다시 밀어 넣음
-    appContainer.innerHTML = homeHtmlTemplate;
-
-    const trendingList = document.getElementById('trending-posts');
-    const recentList = document.getElementById('recent-posts');
-
-    if (globalPosts.length === 0) {
-        if (trendingList) trendingList.innerHTML = '<div class="loading">등록된 글이 없습니다.</div>';
-        return;
+    if (index > -1) {
+        wishList.splice(index, 1);
+    } else {
+        wishList.push(String(postId));
     }
-
-    // 구글 시트의 'category' 열 데이터 기준 필터링 ('인기' / '최신')
-    const trendingData = globalPosts.filter(p => p.category === '인기');
-    const recentData = globalPosts.filter(p => p.category === '최신');
-
-    // 카드 생성 후 주입
-    if (trendingList) trendingList.innerHTML = trendingData.map(post => createCardHtml(post)).join('');
-    if (recentList) recentList.innerHTML = recentData.map(post => createCardHtml(post)).join('');
+    localStorage.setItem('kid_wishlist', JSON.stringify(wishList));
+    
+    const currentPath = window.location.pathname;
+    if (currentPath === '/' || currentPath === '/index.html') {
+        renderHomeLayout();
+    } else if (currentPath === '/wishes') {
+        renderWishlistPage();
+    } else {
+        renderPostDetail(postId);
+    }
 }
 
-// HTML 템플릿: 당근마켓 스타일 카드 컴포넌트
 function createCardHtml(post) {
-    const fallbackImg = 'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=500&q=80'; // 기본 동네 이미지
+    const fallbackImg = 'https://images.unsplash.com/photo-1489710437720-ebb67ec84dd2?w=500&q=80';
     const imageUrl = post.image_url && post.image_url.startsWith('http') ? post.image_url : fallbackImg;
+    const wishList = JSON.parse(localStorage.getItem('kid_wishlist')) || [];
+    const isWished = wishList.includes(String(post.id));
 
     return `
         <div class="card" onclick="routeTo(event, '/post/${post.id}')">
+            <div class="wish-badge" onclick="toggleWishlist('${post.id}', event)">${isWished ? '❤️' : '🤍'}</div>
             <img class="card-img" src="${imageUrl}" alt="${post.title}" loading="lazy">
             <div class="card-content">
                 <div class="card-title">${post.title}</div>
-                <div class="card-date">${post.date || ''}</div>
+                <div class="card-date">💵 특가 소식 확인</div>
             </div>
         </div>
     `;
 }
 
-// 렌더링: 글 상세 화면 및 링크 이동 버튼 기능 추가
+function handleRouting() {
+    const path = window.location.pathname;
+    const decodedPath = decodeURIComponent(path); 
+    const appContainer = document.getElementById('app');
+    const postRouteMatch = decodedPath.match(/^\/post\/(\d+)$/);
+
+    if (postRouteMatch) {
+        renderPostDetail(postRouteMatch[1]);
+    } else if (decodedPath === '/wishes') {
+        renderWishlistPage();
+    } else if (decodedPath === '/' || decodedPath === '/index.html') {
+        renderHomeLayout();
+    } else {
+        appContainer.innerHTML = `<div class="container" style="padding:100px 0; text-align:center;"><h2>페이지를 찾을 수 없습니다.</h2></div>`;
+    }
+}
+
+function renderHomeLayout() {
+    const appContainer = document.getElementById('app');
+    appContainer.innerHTML = homeHtmlTemplate;
+    handleStampSystem();
+
+    const trendingList = document.getElementById('trending-posts');
+    const recentList = document.getElementById('recent-posts');
+
+    const trendingData = globalPosts.filter(p => p.category === '인기');
+    const recentData = globalPosts.filter(p => p.category === '최신');
+
+    if (trendingList) trendingList.innerHTML = trendingData.map(post => createCardHtml(post)).join('');
+    if (recentList) recentList.innerHTML = recentData.map(post => createCardHtml(post)).join('');
+}
+
+function renderWishlistPage() {
+    const appContainer = document.getElementById('app');
+    const wishList = JSON.parse(localStorage.getItem('kid_wishlist')) || [];
+    const wishedPosts = globalPosts.filter(post => wishList.includes(String(post.id)));
+
+    let contentHtml = '';
+    if (wishedPosts.length === 0) {
+        contentHtml = `
+            <div style="text-align:center; padding: 80px 20px; color:#888;">
+                <p style="font-size:3rem; margin:0;">❤️</p>
+                <p style="font-size:0.95rem; margin-top:10px;">저장한 내역이 없습니다.<br>가고 싶은 명소를 위시리스트에 담아보세요!</p>
+            </div>
+        `;
+    } else {
+        contentHtml = `<div class="card-grid">${wishedPosts.map(post => createCardHtml(post)).join('')}</div>`;
+    }
+
+    appContainer.innerHTML = `
+        <div class="container" style="padding: 30px 16px 80px 16px;">
+            <div style="margin-bottom:20px; border-bottom:1px solid #eee; padding-bottom:12px;">
+                <h2 style="margin:0 0 4px 0; font-size:1.4rem; font-weight:800;">❤️ 마이 야놀자 위시</h2>
+                <p style="margin:0; color:#666; font-size:0.85rem;">선택하신 초특가 액티비티 보관함입니다.</p>
+            </div>
+            ${contentHtml}
+        </div>
+    `;
+}
+
 function renderPostDetail(id) {
     const appContainer = document.getElementById('app');
     const post = globalPosts.find(p => p.id == id);
 
     if (!post) {
-        appContainer.innerHTML = `
-            <div class="container" style="padding: 100px 20px; text-align: center;">
-                <h2>존재하지 않거나 삭제된 동네 글입니다.</h2>
-                <a href="/" class="back-btn" onclick="routeTo(event, '/')">← 목록으로 돌아가기</a>
-            </div>
-        `;
+        appContainer.innerHTML = `<div class="container" style="padding:100px 0; text-align:center;"><h2>컨텐츠가 존재하지 않습니다.</h2></div>`;
         return;
     }
 
-    const fallbackImg = 'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=800&q=80';
+    const fallbackImg = 'https://images.unsplash.com/photo-1489710437720-ebb67ec84dd2?w=800&q=80';
     const imageUrl = post.image_url && post.image_url.startsWith('http') ? post.image_url : fallbackImg;
     const formattedContent = post.content ? post.content.replace(/\n/g, '<br>') : '';
+    const wishList = JSON.parse(localStorage.getItem('kid_wishlist')) || [];
+    const isWished = wishList.includes(String(post.id));
 
-    // 구글 시트에 link 값이 존재할 때만 생성할 버튼 HTML 컴포넌트
     let linkButtonHtml = '';
     if (post.link && post.link.startsWith('http')) {
         linkButtonHtml = `
-            <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; text-align: center;">
+            <div style="margin-top: 25px; display: flex; gap: 10px;">
+                <button onclick="toggleWishlist('${post.id}', null)" class="wish-btn ${isWished ? 'active' : ''}">
+                    ${isWished ? '❤️' : '🤍 찜하기'}
+                </button>
                 <a href="${post.link}" target="_blank" rel="noopener noreferrer" class="action-btn">
-                    🔗 링크 바로가기
+                    ⚡ 야놀자 초특가 예약하기
                 </a>
             </div>
         `;
     }
 
-    // 상세페이지 UI 주입
     appContainer.innerHTML = `
-        <div class="container" style="padding: 40px 20px; max-width: 700px;">
-            <a href="/" class="back-btn" style="display:inline-block; margin-bottom:20px; color:#FF8A3D; text-decoration:none; font-weight:bold;" onclick="routeTo(event, '/')">← 동네목록으로</a>
-            <article style="background: white; border-radius: 12px; border: 1px solid #eee; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
-                <img src="${imageUrl}" style="width:100%; max-height:400px; object-fit:cover;" alt="본문 이미지">
-                <div style="padding: 30px;">
-                    <span style="background: #fff1e6; color: #FF8A3D; padding: 4px 10px; border-radius: 4px; font-size: 0.85rem; font-weight: bold;">${post.category || '동네소식'}</span>
-                    <h1 style="font-size: 1.8rem; margin: 15px 0 10px 0; line-height: 1.4;">${post.title}</h1>
-                    <div style="color: #888; font-size: 0.85rem; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px;">작성일: ${post.date || '오늘'}</div>
-                    <div style="font-size: 1.05rem; line-height: 1.7; color: #333; word-break: break-word; margin-bottom: 10px;">${formattedContent}</div>
-                    
+        <div class="container" style="padding: 16px 16px 80px 16px; max-width: 650px;">
+            <a href="/" class="back-btn" style="display:inline-block; margin-bottom:15px; color:var(--primary); text-decoration:none; font-weight:bold;" onclick="routeTo(event, '/')">← 뒤로가기</a>
+            <article style="background: white; border-radius: var(--border-radius-md); overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                <img src="${imageUrl}" style="width:100%; max-height:350px; object-fit:cover;">
+                <div style="padding: 20px;">
+                    <span style="background: #FFF0F6; color: var(--primary); padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">${post.category || '핫플레이스'}</span>
+                    <h1 style="font-size: 1.4rem; margin: 12px 0 10px 0; line-height:1.4; font-weight:800;">${post.title}</h1>
+                    <div style="font-size: 0.95rem; line-height: 1.6; color: #444; margin-bottom:10px;">${formattedContent}</div>
                     ${linkButtonHtml}
                 </div>
             </article>
@@ -158,23 +202,17 @@ function renderPostDetail(id) {
     `;
 }
 
-// SPA 방식 주소 이동 함수
-function routeTo(event, path) {
-    if (event) event.preventDefault();
+function routeTo(e, path) {
+    if (e) e.preventDefault();
     window.history.pushState({}, '', path);
     handleRouting();
+    window.scrollTo(0,0); // 페이지 전환 시 상단 스크롤 리셋 UX 적용
 }
 
-// 브라우저 뒤로가기 / 앞으로가기 내비게이션 동기화
 window.addEventListener('popstate', handleRouting);
-
-// 초기 애플리케이션 진입점
 window.addEventListener('DOMContentLoaded', async () => {
     const appContainer = document.getElementById('app');
-    if (appContainer) {
-        homeHtmlTemplate = appContainer.innerHTML;
-    }
-
+    if (appContainer) homeHtmlTemplate = appContainer.innerHTML;
     await fetchPosts();
     handleRouting();
 });
