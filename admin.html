@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>액티비티 플랫폼 - 관리자 대시보드</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="admin-sidebar">
+            <div class="sidebar-brand">
+                <i class="fa-solid fa-chart-line"></i>
+                <span>Activity Admin</span>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="#" class="menu-item active"><i class="fa-solid fa-house-chimney"></i> 대시보드 홈</a>
+                <a href="#" class="menu-item"><i class="fa-solid fa-eye"></i> 조회수 분석</a>
+                <a href="#" class="menu-item"><i class="fa-solid fa-mouse-pointer"></i> 클릭 분석</a>
+                <a href="#" class="menu-item"><i class="fa-solid fa-gear"></i> 시스템 설정</a>
+            </nav>
+        </aside>
+
+        <main class="admin-main">
+            <header class="admin-header">
+                <h2><i class="fa-solid fa-gauge-high"></i> 실시간 통합 분석 대시보드</h2>
+                <div class="admin-profile">
+                    <span class="badge">Live</span>
+                    <span class="admin-name">최고관리자님</span>
+                </div>
+            </header>
+
+            <section class="summary-widgets">
+                <div class="widget-card">
+                    <div class="widget-icon bg-primary"><i class="fa-solid fa-users"></i></div>
+                    <div class="widget-info">
+                        <div class="widget-label">오늘 총 조회수</div>
+                        <div class="widget-value" id="stat-total-views">0</div>
+                    </div>
+                </div>
+                <div class="widget-card">
+                    <div class="widget-icon bg-success"><i class="fa-solid fa-arrow-pointer"></i></div>
+                    <div class="widget-info">
+                        <div class="widget-label">오늘 총 클릭수</div>
+                        <div class="widget-value" id="stat-total-clicks">0</div>
+                    </div>
+                </div>
+                <div class="widget-card">
+                    <div class="widget-icon bg-warning"><i class="fa-solid fa-percent"></i></div>
+                    <div class="widget-info">
+                        <div class="widget-label">평균 전환율 (CTR)</div>
+                        <div class="widget-value" id="stat-ctr">0%</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="dashboard-content">
+                <div class="content-box block-chart">
+                    <h3><i class="fa-solid fa-fire text-danger"></i> 가장 많이 클릭된 액티비티 TOP 5</h3>
+                    <div class="chart-container" id="top-clicks-chart">
+                        <div class="loading">데이터 분석 중...</div>
+                    </div>
+                </div>
+
+                <div class="content-box block-table">
+                    <h3><i class="fa-solid fa-list-ol"></i> 액티비티별 트래픽 상세 통계</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>순위</th>
+                                    <th>액티비티 명</th>
+                                    <th>카테고리</th>
+                                    <th>조회수 (Views)</th>
+                                    <th>클릭수 (Clicks)</th>
+                                    <th>클릭률 (CTR)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-stats-table-body">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>
