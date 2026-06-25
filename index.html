@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>노리야 키즈 | 동네 액티비티 총집합</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=9e748c58c39f61c6111a8d0d18ff77e2&libraries=services"></script>
+    <script type="text/javascript" src="http://dapi.kakao.com/v2/maps/sdk.js?appkey=9e748c58c39f61c6111a8d0d18ff77e2&libraries=services&autoload=false"></script>
     <link rel="stylesheet" href="/css/style.css">
     
 </head>
@@ -33,11 +33,16 @@
         </section>
 
         <section class="container near-map-section">
-            <h3 class="map-section-title">📍 내 위치에서 <span>가장 가까운 액티비티</span></h3>
+            <!-- <h3 class="map-section-title">📍 내 위치에서 <span>가장 가까운 액티비티</span></h3>
             <div id="near-map"></div>
             <div id="near-recommend-spot">
                 <div class="map-loading-msg">현재 위치와 액티비티 거리를 계산하고 있습니다...</div>
-            </div>
+            </div> -->
+            <section class="container near-map-section">
+                <h3 class="map-section-title">📍 추천 액티비티 <span>위치 보기</span></h3>
+                <div id="near-map"></div>
+                <div id="near-recommend-spot"></div>
+            </section>
         </section>
 
         <section class="container" id="stamp-container"></section>

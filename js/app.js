@@ -248,6 +248,10 @@ function renderHomeLayout() {
 
     if (trendingList) trendingList.innerHTML = trendingData.map(post => createCardHtml(post)).join('');
     if (recentList) recentList.innerHTML = recentData.map(post => createCardHtml(post)).join('');
+
+// 📍 [여기 추가] 홈 레이아웃 템플릿이 화면에 다 그려진 후 지도를 렌더링합니다.
+renderNearLocationMap(globalPosts);
+
 }
 
 function renderWishlistPage() {
@@ -502,56 +506,63 @@ document.addEventListener('DOMContentLoaded', () => {
     // ... 기존 데이터 페치 및 렌더링 함수들 ...
 });
 
-
 // ==========================================================================
-// [구조 변경] 렌더링 시점에 직접 호출하는 안전한 지도 엔진
+// [최종 로드 보장] 프로토콜 제한 및 동적 로딩 타이밍 해결 버전
 // ==========================================================================
 function renderNearLocationMap(posts) {
     const mapContainer = document.getElementById('near-map');
     const recommendContainer = document.getElementById('near-recommend-spot');
     
-    // 엘리먼트 체크
     if (!mapContainer || !recommendContainer) return;
 
-    // 데이터가 비어있다면 안내 후 종료
     if (!posts || posts.length === 0) {
-        recommendContainer.innerHTML = `<div class="map-loading-msg">액티비티 데이터가 없습니다.</div>`;
+        recommendContainer.innerHTML = `<div class="map-loading-msg">액티비티 데이터(posts)가 비어있습니다.</div>`;
         return;
     }
 
-    // 카카오 지도 라이브러리 로드 체크
-    if (typeof kakao === 'undefined' || !kakao.maps || !kakao.maps.services) {
-        recommendContainer.innerHTML = `<div class="map-loading-msg" style="color:red;">카카오 지도 라이브러리가 로드되지 않았습니다. index.html의 스크립트 태그를 확인해 주세요.</div>`;
+    // 카카오 라이브러리가 아예 존재하지 않는지 체크
+    if (typeof kakao === 'undefined') {
+        recommendContainer.innerHTML = `<div class="map-loading-msg" style="color:red; font-size:12px;">카카오 스크립트가 로드되지 않았습니다.<br>index.html의 주소 맨 앞에 'http:' 가 붙어있는지 확인하세요.</div>`;
         return;
     }
 
-    // 기본 좌표 (서울역)
-    const DEFAULT_LAT = 37.555142;
-    const DEFAULT_LNG = 126.970450;
+    // 카카오 지도 내 핵심 모듈(v3) 로드를 안전하게 대기 및 실행
+    kakao.maps.load(function() {
+        const DEFAULT_LAT = 37.555142;
+        const DEFAULT_LNG = 126.970450;
 
-    if (!navigator.geolocation) {
-        processDistanceAndMap(DEFAULT_LAT, DEFAULT_LNG, posts, true);
-        return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-        (position) => {
-            processDistanceAndMap(position.coords.latitude, position.coords.longitude, posts, false);
-        },
-        (error) => {
-            console.warn("위치 권한 제한 - 기본 위치 대체", error);
+        if (!navigator.geolocation) {
             processDistanceAndMap(DEFAULT_LAT, DEFAULT_LNG, posts, true);
-        },
-        { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
-    );
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                processDistanceAndMap(position.coords.latitude, position.coords.longitude, posts, false);
+            },
+            (error) => {
+                console.warn("위치 권한 사용 불가 - 기본 서울역 위치로 대체합니다.", error);
+                processDistanceAndMap(DEFAULT_LAT, DEFAULT_LNG, posts, true);
+            },
+            { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
+        );
+    });
 
     async function processDistanceAndMap(centerLat, centerLng, postsData, isDefault) {
         try {
             const geocoder = new kakao.maps.services.Geocoder();
+
             const distancePromises = postsData.map(post => {
                 return new Promise((resolve) => {
-                    // 구글 시트 주소 필드명 유연하게 매핑 (address, Address, 주소 모두 지원)
-                    const address = post.address || post.Address || post.주소; 
+                    const keys = Object.keys(post);
+                    const foundKey = keys.find(k => 
+                        k.toLowerCase().includes('address') || 
+                        k.includes('주소') || 
+                        k.includes('위치') || 
+                        k.includes('장소')
+                    );
+                    
+                    let address = foundKey ? String(post[foundKey]).trim() : (post.address || post.주소 || "");
                     if (!address) return resolve(null);
                     
                     geocoder.addressSearch(address, function(result, status) {
@@ -570,41 +581,49 @@ function renderNearLocationMap(posts) {
             const calculatedSpots = (await Promise.all(distancePromises)).filter(spot => spot !== null);
 
             if (calculatedSpots.length === 0) {
-                recommendContainer.innerHTML = `<div class="map-loading-msg">스프레드시트에 올바른 '주소(address)'가 입력된 액티비티가 없습니다.</div>`;
+                const detectedKeys = Object.keys(postsData[0]).join(', ');
+                recommendContainer.innerHTML = `
+                    <div class="map-loading-msg" style="color:#d9411e; text-align:left; line-height:1.5; padding:10px; font-size:12px;">
+                        <strong>⚠️ 주소 데이터 추출 실패</strong><br>
+                        감지된 시트 데이터 컬럼: <code style="background:#eee; padding:2px 6px;">[${detectedKeys}]</code>
+                    </div>
+                `;
                 return;
             }
 
-            // 거리순 정렬 후 최단 거리 추출
             calculatedSpots.sort((a, b) => a.distance - b.distance);
             const closestSpot = calculatedSpots[0];
 
-            // 카카오 지도 객체 레이아웃 바인딩
+            // 렌더링 영역 빌드
             const spotPosition = new kakao.maps.LatLng(closestSpot.lat, closestSpot.lng);
             const mapOption = { center: spotPosition, level: 5 };
             const map = new kakao.maps.Map(mapContainer, mapOption);
 
-            // 마커 생성
             const marker = new kakao.maps.Marker({ position: spotPosition, map: map });
+            
+            const titleKey = Object.keys(closestSpot).find(k => k.toLowerCase().includes('title') || k.includes('제목') || k.toLowerCase().includes('name')) || '';
+            const spotTitle = titleKey ? closestSpot[titleKey] : (closestSpot.title || closestSpot.제목 || '추천 장소');
+
             const infowindow = new kakao.maps.InfoWindow({
-                content: `<div style="padding:6px; font-size:11px; font-weight:700; color:#222; text-align:center; width:130px;">${closestSpot.title || closestSpot.제목 || '추천 장소'}</div>`
+                content: `<div style="padding:6px; font-size:11px; font-weight:700; color:#222; text-align:center; width:130px;">${spotTitle}</div>`
             });
             infowindow.open(map, marker);
 
-            // 거리 텍스트 포맷팅
             let distanceText = closestSpot.distance < 1 
                 ? `${Math.round(closestSpot.distance * 1000)}m 앞` 
                 : `${closestSpot.distance.toFixed(1)}km 근처`;
 
             let prefixTag = isDefault ? `📍 추천 액티비티` : `⚡ 현재 위치에서 ${distanceText}`;
+            
             const imgUrl = closestSpot.image_url || closestSpot.이미지 || 'https://images.unsplash.com/photo-1489710437720-ebb67ec84dd2?w=100&q=80';
-            const spotId = closestSpot.id || closestSpot.ID;
+            const spotId = closestSpot.id || closestSpot.ID || 1;
 
             recommendContainer.innerHTML = `
                 <div class="near-recommend-card" onclick="location.search = '?id=${spotId}'">
                     <img src="${imgUrl}" alt="추천">
                     <div class="info">
                         <div class="distance-tag" style="${isDefault ? 'color:#111;' : ''}">${prefixTag}</div>
-                        <div class="place-name">${closestSpot.title || closestSpot.제목}</div>
+                        <div class="place-name">${spotTitle}</div>
                     </div>
                 </div>
             `;
