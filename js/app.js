@@ -54,8 +54,8 @@ function handleStampSystem() {
         }
         stampContainer.innerHTML = `
             <div class="stamp-box">
-                <h4>⚡ 야놀자 락인 보너스 스탬프 (${stampData.count}/5)</h4>
-                <p>매일 앱 방문 시 야놀자 키즈 코인이 충전되며 연속 완주 시 히든 쿠폰이 발급됩니다.</p>
+                <h4>⚡ 노리야 락인 보너스 스탬프 (${stampData.count}/5)</h4>
+                <p>매일 앱 방문 시 노리야 키즈 코인이 충전되며 연속 완주 시 히든 쿠폰이 발급됩니다.</p>
                 <div class="stamp-grid">${stampIcons}</div>
             </div>
         `;
@@ -227,7 +227,7 @@ function handleRouting() {
         // [카테고리 분기 매핑]
         const categoryName = categoryRouteMatch[1];
         filteredPosts = globalPosts.filter(p => p.category === categoryName);
-        renderInfiniteListPage(`🎪 야놀자 키즈 [${categoryName}] 기획전`);
+        renderInfiniteListPage(`🎪 노리야 키즈 [${categoryName}] 기획전`);
     } else if (decodedPath === '/wishes') {
         renderWishlistPage();
     } else if (decodedPath === '/' || decodedPath === '/index.html') {
@@ -270,7 +270,7 @@ function renderWishlistPage() {
     appContainer.innerHTML = `
         <div class="container" style="padding: 30px 16px 80px 16px;">
             <div style="margin-bottom:20px; border-bottom:1px solid #eee; padding-bottom:12px;">
-                <h2 style="margin:0 0 4px 0; font-size:1.4rem; font-weight:800;">❤️ 마이 야놀자 위시</h2>
+                <h2 style="margin:0 0 4px 0; font-size:1.4rem; font-weight:800;">❤️ 마이 노리야 위시</h2>
                 <p style="margin:0; color:#666; font-size:0.85rem;">선택하신 초특가 액티비티 보관함입니다.</p>
             </div>
             ${contentHtml}

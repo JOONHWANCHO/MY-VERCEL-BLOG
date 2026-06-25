@@ -1,8 +1,8 @@
 :root {
-    --primary: #E61C5D; /* 야놀자 메인 시그니처 핑크 */
+    --primary: #E61C5D; /* 노리야 메인 시그니처 핑크 */
     --primary-hover: #C9144D;
     --accent: #DE2E6A;
-    --bg: #F7F7F9; /* 깔끔하고 정돈된 야놀자식 연회색 바탕 */
+    --bg: #F7F7F9; /* 깔끔하고 정돈된 노리야식 연회색 바탕 */
     --text: #1A1A1A;
     --text-muted: #8F8F8F;
     --border-radius-sm: 8px;
@@ -18,7 +18,7 @@ body {
 }
 .container { max-width: 960px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; }
 
-/* 야놀자 스타일 상단 헤더 & 검색 바 구조 */
+/* 노리야 스타일 상단 헤더 & 검색 바 구조 */
 .navbar { background: white; border-bottom: 1px solid #EDEDED; padding: 12px 0; position: sticky; top: 0; z-index: 100; }
 .navbar-content { display: flex; align-items: center; gap: 20px; }
 .logo { font-size: 1.5rem; font-weight: 900; color: var(--primary); text-decoration: none; letter-spacing: -1px; }
@@ -47,7 +47,7 @@ body {
 
 .header-search-bar input::placeholder { color: #A0A0A0; }
 
-/* 야놀자 시그니처 그라데이션 배너 */
+/* 노리야 시그니처 그라데이션 배너 */
 .hero-banner { 
     background: linear-gradient(135deg, #E61C5D 0%, #FF5E89 100%); 
     color: white;
@@ -86,7 +86,7 @@ body {
 .section-title { font-size: 1.25rem; margin: 0 0 2px 0; font-weight: 800; letter-spacing: -0.3px; color: #1A1A1A; }
 .section-desc { font-size: 0.85rem; color: var(--text-muted); }
 
-/* 야놀자 스타일 리스트 카드 테마 (사진 비율 강화, 하단 정돈) */
+/* 노리야 스타일 리스트 카드 테마 (사진 비율 강화, 하단 정돈) */
 .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
 @media (min-width: 768px) { .card-grid { grid-template-columns: repeat(4, 1fr); } }
 
@@ -120,7 +120,7 @@ body {
 }
 .wish-badge:hover { transform: scale(1.15); }
 
-/* 락인 기능 1: 야놀자 코인 획득형 출석 스탬프 박스 */
+/* 락인 기능 1: 노리야 코인 획득형 출석 스탬프 박스 */
 .stamp-box { background: white; border: 1px solid #EAEAEA; border-radius: var(--border-radius-md); padding: 18px; margin: 16px auto; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
 .stamp-box h4 { margin: 0 0 4px 0; color: var(--primary); font-size: 1rem; font-weight: 800; }
 .stamp-box p { margin: 0 0 14px 0; font-size: 0.8rem; color: #666; }
@@ -128,12 +128,12 @@ body {
 .stamp { font-size: 1.5rem; background: #F2F3F5; border-radius: 50%; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; filter: grayscale(100%); opacity: 0.4; }
 .stamp.active { filter: grayscale(0%); opacity: 1; background: #FFF0F6; animation: pop 0.3s ease; }
 
-/* 야놀자 스타일 특가 프로모션 띠 배너 */
+/* 노리야 스타일 특가 프로모션 띠 배너 */
 .promo-banner-section { padding: 10px 0; }
 .promo-banner { background: #1A1A1A; color: white; padding: 14px 20px; border-radius: var(--border-radius-sm); font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
 .promo-go { color: #FFD43B; font-weight: bold; }
 
-/* 야놀자 고유 하단 고정형 네비게이션 바 컴포넌트 */
+/* 노리야 고유 하단 고정형 네비게이션 바 컴포넌트 */
 .bottom-nav {
     position: fixed;
     bottom: 0;
@@ -165,7 +165,7 @@ body {
 @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 @keyframes pop { 0% { transform: scale(0.7); } 100% { transform: scale(1); } }
 
-/* 야놀자 스타일 프리미엄 상세페이지 구조 디자인 */
+/* 노리야 스타일 프리미엄 상세페이지 구조 디자인 */
 .detail-info-section {
     background: #FFF;
     border-radius: var(--border-radius-md);
@@ -263,7 +263,7 @@ body {
     padding-left: 20px;
 }
 .markdown-body li { margin-bottom: 4px; }
-.markdown-body strong { color: var(--primary); } /* 강조 텍스트 야놀자 핑크색 부여 */
+.markdown-body strong { color: var(--primary); } /* 강조 텍스트 노리야 핑크색 부여 */
 .markdown-body blockquote {
     margin: 12px 0;
     padding: 8px 16px;
