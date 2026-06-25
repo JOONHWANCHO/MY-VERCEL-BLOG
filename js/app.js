@@ -399,3 +399,105 @@ window.addEventListener('DOMContentLoaded', async () => {
     await fetchPosts();
     handleRouting();
 });
+
+// 초기화 시점에 호출해 주세요 (예: 돔 로드 완료 시점)
+function initBannerCarousel() {
+    const container = document.getElementById('top-banner-carousel');
+    if (!container) return;
+
+    // 가상의 배너 데이터 (추후 구글 시트에 별도 탭을 만들어 연동하셔도 좋습니다)
+    const banners = [
+        {
+            img: "https://images.unsplash.com/photo-1595974482597-4b8da8879bc5?w=1000&q=80",
+            title: "2026 숙박세일 페스타<br>최대 7만원 쿠폰 받기",
+            desc: "NOL 단독 더하기 쿠폰 혜택까지",
+            badge: "🎈 문화체육관광부 × 한국관광공사"
+        },
+        {
+            img: "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=1000&q=80",
+            title: "여름방학 도파민 폭발!<br>전국 테마파크 종일권 특가",
+            desc: "최대 45% 단독 선착순 할인 공급",
+            badge: "⚡ 한정수량"
+        },
+        {
+            img: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=1000&q=80",
+            title: "아이랑 가기 좋은<br>전국 실내 아쿠아리움 TOP 5",
+            desc: "시원한 실내에서 만나는 바다 세상",
+            badge: "🐳 MD추천"
+        }
+    ];
+
+    // HTML 구조 동적 생성
+    container.innerHTML = `
+        <div class="banner-carousel-container">
+            <div class="banner-track" id="bannerTrack">
+                ${banners.map(b => `
+                    <div class="banner-item">
+                        <img src="${b.img}" alt="배너">
+                        <div class="banner-overlay">
+                            <div class="banner-badge" style="font-size:0.68rem; color:#333; font-weight:700;">${b.badge}</div>
+                            <div class="banner-title">${b.title}</div>
+                            <div class="banner-desc">${b.desc}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="banner-controls">
+                <button class="banner-play-toggle" id="bannerPlayBtn">⏸</button>
+                <div class="banner-indicator" id="bannerIndicator">01 <span class="total">/ ${String(banners.length).padStart(2, '0')}+</span></div>
+            </div>
+        </div>
+    `;
+
+    const track = document.getElementById('bannerTrack');
+    const indicator = document.getElementById('bannerIndicator');
+    const playBtn = document.getElementById('bannerPlayBtn');
+    
+    let currentIndex = 0;
+    let isPlaying = true;
+    let autoSlideTimer = null;
+
+    // 1. 스크롤 감지하여 인디케이터 숫자 변경
+    track.addEventListener('scroll', () => {
+        const width = track.clientWidth;
+        const newIndex = Math.round(track.scrollLeft / width);
+        if (newIndex !== currentIndex && newIndex < banners.length) {
+            currentIndex = newIndex;
+            indicator.innerHTML = `${String(currentIndex + 1).padStart(2, '0')} <span class="total">/ ${String(banners.length).padStart(2, '0')}+</span>`;
+        }
+    });
+
+    // 2. 자동 슬라이드 가동 함수
+    function startAutoSlide() {
+        autoSlideTimer = setInterval(() => {
+            currentIndex = (currentIndex + 1) % banners.length;
+            const targetLeft = currentIndex * (track.clientWidth - 10); // 간격 보정
+            track.scrollTo({ left: targetLeft, behavior: 'smooth' });
+        }, 3500); // 3.5초 주기 무브
+    }
+
+    function stopAutoSlide() {
+        clearInterval(autoSlideTimer);
+    }
+
+    // 3. 재생/일시정지 토글 버튼 이벤트
+    playBtn.addEventListener('click', () => {
+        if (isPlaying) {
+            stopAutoSlide();
+            playBtn.innerText = '▶';
+        } else {
+            startAutoSlide();
+            playBtn.innerText = '⏸';
+        }
+        isPlaying = !isPlaying;
+    });
+
+    // 최초 자동 타이머 실행
+    startAutoSlide();
+}
+
+// 앱 실행 시 배너 빌드 트리거 추가
+document.addEventListener('DOMContentLoaded', () => {
+    initBannerCarousel();
+    // ... 기존 데이터 페치 및 렌더링 함수들 ...
+});
