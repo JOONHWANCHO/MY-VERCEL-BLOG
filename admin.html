@@ -9,6 +9,28 @@
     <link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
+
+    <div id="admin-login-overlay" class="login-overlay">
+        <div class="login-box">
+            <div class="login-logo">
+                <i class="fa-solid fa-lock text-primary"></i>
+                <h3>Activity Admin 로그인</h3>
+            </div>
+            <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
+                <div class="input-group">
+                    <label for="admin-id"><i class="fa-solid fa-user"></i> 아이디</label>
+                    <input type="text" id="admin-id" placeholder="Admin ID 입력" required autocomplete="off">
+                </div>
+                <div class="input-group">
+                    <label for="admin-pw"><i class="fa-solid fa-key"></i> 비밀번호</label>
+                    <input type="password" id="admin-pw" placeholder="Password 입력" required>
+                </div>
+                <div id="login-error-msg" class="login-error"></div>
+                <button type="submit" class="btn-login">안전 로그인 <i class="fa-solid fa-arrow-right-to-bracket"></i></button>
+            </form>
+        </div>
+    </div>
+
     <div class="admin-container">
         <aside class="admin-sidebar">
             <div class="sidebar-brand">

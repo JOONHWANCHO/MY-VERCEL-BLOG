@@ -1,6 +1,7 @@
 const SPREADSHEET_ID = '1_4ivDTckWs1T0RiN3O5Hao6-LwwQevm1tJZ10AUONps'; 
 const SHEET_NAME = 'Sheet1'; 
 const GOOGLE_SHEET_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME}`;
+const TRACKING_API_URL = "https://script.google.com/macros/s/AKfycbzDL2_0OmI_LVYIxbWj_7FdqTxJGIATsjeyh90n6O29jYD_LRnnw_qHjEyWlyDZ4W4/exec";
 
 let globalPosts = [];
 let homeHtmlTemplate = '';
@@ -92,6 +93,9 @@ function createCardHtml(post) {
     const imageUrl = post.image_url && post.image_url.startsWith('http') ? post.image_url : fallbackImg;
     const wishList = JSON.parse(localStorage.getItem('kid_wishlist')) || [];
     const isWished = wishList.includes(String(post.id));
+
+    // 💡 문자열 오작동을 방지하기 위해 톳씨(싱글쿼터)를 이스케이프하거나 안전하게 변환합니다.
+    const safeTitle = post.title ? post.title.replace(/'/g, "\\'") : "이름 없는 액티비티";
 
     return `
         <div class="card" onclick="routeTo(event, '/post/${post.id}')">
@@ -640,4 +644,23 @@ function renderNearLocationMap(posts) {
             map.panTo(movePosition);
         }
     });
+}
+
+// 💡 [app.js 내부에 추가할 글로벌 트래커 엔진]
+async function sendUserActionLog(postId, title, actionType) {
+    try {
+        // 백그라운드 비동기 통신으로 사용자 동작 전송 (보안상 cors 예외 처리를 위해 텍스트 전송 후 파싱 유도)
+        fetch(TRACKING_API_URL, {
+            method: "POST",
+            mode: "no-cors", // 브라우저 CORS 차단 우회 보호 조치
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                postId: postId,
+                title: title,
+                actionType: actionType // 'view' (조회) 또는 'click' (카드 링크 클릭)
+            })
+        });
+    } catch (e) {
+        console.warn("로그 전송 실패:", e);
+    }
 }
