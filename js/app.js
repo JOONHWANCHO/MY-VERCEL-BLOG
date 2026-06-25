@@ -628,11 +628,15 @@ function renderNearLocationMap(posts) {
         // 3. 하단 5개 슬라이더 카드 HTML 구성
         slider.innerHTML = validSpots.map((spot, idx) => {
             const imgUrl = spot.image_url || spot.이미지 || 'https://images.unsplash.com/photo-1489710437720-ebb67ec84dd2?w=100&q=80';
-            const spotId = spot.id || spot.ID || 1;
+            // const spotId = spot.id || spot.ID || 1;
             const isActive = idx === 0 ? 'active' : '';
 
+            // 안전한 타이틀 변수를 먼저 선언해 주는 것이 좋습니다.
+            const safeSpotTitle = spot.title ? spot.title.replace(/'/g, "\\'") : "추천 장소";
+            const spotId = spot.id || `map-${idx}`; // ID 필드가 없다면 대체 값 지정
+
             return `
-                <div class="map-recommend-card ${isActive}" id="map-card-${idx}" onclick="window.mapSelectEngine(${idx})">
+                <div class="map-recommend-card ${isActive}" id="map-card-${idx}" onclick="sendUserActionLog('${spotId}', '${safeSpotTitle}', 'click'); window.mapSelectEngine(${idx})">
                     <img src="${imgUrl}" alt="장소">
                     <div class="info">
                         <div class="badge-tag">TOP ${idx + 1} 액티비티</div>
