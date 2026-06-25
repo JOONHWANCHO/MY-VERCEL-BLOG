@@ -54,7 +54,7 @@ function handleStampSystem() {
         }
         stampContainer.innerHTML = `
             <div class="stamp-box">
-                <h4>⚡ 노리야 락인 보너스 스탬프 (${stampData.count}/5)</h4>
+                <h4>⚡ 노리야 보너스 스탬프 (${stampData.count}/5)</h4>
                 <p>매일 앱 방문 시 노리야 키즈 코인이 충전되며 연속 완주 시 히든 쿠폰이 발급됩니다.</p>
                 <div class="stamp-grid">${stampIcons}</div>
             </div>
