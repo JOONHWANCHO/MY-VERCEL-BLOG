@@ -28,13 +28,24 @@ body {
     flex-grow: 1;
     background: #F2F3F5;
     border-radius: 24px;
-    padding: 8px 16px;
-    font-size: 0.85rem;
-    color: #666;
-    cursor: pointer;
+    padding: 6px 14px;
     display: flex;
     align-items: center;
+    gap: 8px;
 }
+
+.header-search-bar .search-icon { font-size: 0.9rem; color: #8F8F8F; }
+
+.header-search-bar input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 0.85rem;
+    color: #1A1A1A;
+}
+
+.header-search-bar input::placeholder { color: #A0A0A0; }
 
 /* 야놀자 시그니처 그라데이션 배너 */
 .hero-banner { 
@@ -52,7 +63,8 @@ body {
 /* 라운드 서클 퀵 아이콘 메뉴 */
 .category-section { padding: 25px 0 10px 0; }
 .category-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-.category-item { text-align: center; cursor: pointer; }
+.category-item { text-align: center; cursor: pointer;transition: all 0.2s ease; }
+.category-item:active { transform: scale(0.95); }
 .category-icon-wrap { 
     width: 56px; 
     height: 56px; 
@@ -152,3 +164,111 @@ body {
 
 @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 @keyframes pop { 0% { transform: scale(0.7); } 100% { transform: scale(1); } }
+
+/* 야놀자 스타일 프리미엄 상세페이지 구조 디자인 */
+.detail-info-section {
+    background: #FFF;
+    border-radius: var(--border-radius-md);
+    padding: 24px;
+    margin-top: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+.detail-section-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #1A1A1A;
+    margin: 0 0 16px 0;
+    border-left: 4px solid var(--primary);
+    padding-left: 10px;
+}
+.info-meta-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 8px;
+}
+.info-meta-table td {
+    padding: 12px 0;
+    border-bottom: 1px solid #F2F3F5;
+    font-size: 0.9rem;
+    vertical-align: top;
+}
+.info-meta-table td.label {
+    width: 25%;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+.info-meta-table td.value {
+    color: #333;
+    font-weight: 500;
+}
+.info-text-block {
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: #4E4E4E;
+    background: #F7F7F9;
+    padding: 16px;
+    border-radius: var(--border-radius-sm);
+    margin-bottom: 12px;
+}
+.map-address-box {
+    background: #FFF0F6;
+    border: 1px solid #FFE3EE;
+    border-radius: var(--border-radius-sm);
+    padding: 14px;
+    font-size: 0.88rem;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* 하단 고정 구매바 UX */
+.fixed-booking-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #FFF;
+    border-top: 1px solid #EDEDED;
+    padding: 12px 16px;
+    display: flex;
+    gap: 12px;
+    z-index: 1001;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+}
+.fixed-booking-bar .container {
+    display: flex;
+    width: 100%;
+    max-width: 650px;
+    gap: 10px;
+    padding: 0;
+}
+
+/* 마크다운 렌더링 내부 요소 래핑 스타일 */
+.markdown-body {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: #2b303a;
+}
+.markdown-body h1, .markdown-body h2, .markdown-body h3 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #1A1A1A;
+    font-weight: 700;
+}
+.markdown-body h3 { font-size: 1.1rem; }
+.markdown-body p { margin: 0 0 12px 0; }
+.markdown-body ul, .markdown-body ol {
+    margin: 0 0 16px 0;
+    padding-left: 20px;
+}
+.markdown-body li { margin-bottom: 4px; }
+.markdown-body strong { color: var(--primary); } /* 강조 텍스트 야놀자 핑크색 부여 */
+.markdown-body blockquote {
+    margin: 12px 0;
+    padding: 8px 16px;
+    background: #F2F3F5;
+    border-left: 4px solid #CED4DA;
+    color: #666;
+    font-style: italic;
+}
