@@ -504,39 +504,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // ==========================================================================
-// [독립 실행형 엔진] 내 위치 기준 가장 가까운 장소 추적 및 지도 바인딩 스크립트
+// [구조 변경] 렌더링 시점에 직접 호출하는 안전한 지도 엔진
 // ==========================================================================
-(function() {
-    // 💡 [필수 설정] 기존 코드에서 구글 시트 데이터가 저장되는 배열 변수명을 적어주세요.
-    // 만약 기존 변수명이 posts 라면 = posts; 로 변경하시면 됩니다.
-    const POSTS_ARRAY = globalPosts; 
+function renderNearLocationMap(posts) {
+    const mapContainer = document.getElementById('near-map');
+    const recommendContainer = document.getElementById('near-recommend-spot');
+    
+    // 엘리먼트 체크
+    if (!mapContainer || !recommendContainer) return;
 
-    // 앱이 실행되고 데이터가 바인딩되는 타이밍을 캐치하기 위한 관찰 스케줄러 가동
-    const checkInterval = setInterval(() => {
-        if (typeof kakao !== 'undefined' && POSTS_ARRAY && POSTS_ARRAY.length > 0) {
-            clearInterval(checkInterval);
-            runNearLocationEngine(POSTS_ARRAY);
-        }
-    }, 300);
+    // 데이터가 비어있다면 안내 후 종료
+    if (!posts || posts.length === 0) {
+        recommendContainer.innerHTML = `<div class="map-loading-msg">액티비티 데이터가 없습니다.</div>`;
+        return;
+    }
 
-    function runNearLocationEngine(posts) {
-        const mapContainer = document.getElementById('near-map');
-        const recommendContainer = document.getElementById('near-recommend-spot');
-        if (!mapContainer || !recommendContainer) return;
+    // 카카오 지도 라이브러리 로드 체크
+    if (typeof kakao === 'undefined' || !kakao.maps || !kakao.maps.services) {
+        recommendContainer.innerHTML = `<div class="map-loading-msg" style="color:red;">카카오 지도 라이브러리가 로드되지 않았습니다. index.html의 스크립트 태그를 확인해 주세요.</div>`;
+        return;
+    }
 
-        if (!navigator.geolocation) {
-            recommendContainer.innerHTML = `<div class="map-loading-msg">위치 서비스를 지원하지 않는 브라우저입니다.</div>`;
-            return;
-        }
+    // 기본 좌표 (서울역)
+    const DEFAULT_LAT = 37.555142;
+    const DEFAULT_LNG = 126.970450;
 
-        navigator.geolocation.getCurrentPosition(async (position) => {
-            const userLat = position.coords.latitude;  
-            const userLng = position.coords.longitude; 
+    if (!navigator.geolocation) {
+        processDistanceAndMap(DEFAULT_LAT, DEFAULT_LNG, posts, true);
+        return;
+    }
 
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            processDistanceAndMap(position.coords.latitude, position.coords.longitude, posts, false);
+        },
+        (error) => {
+            console.warn("위치 권한 제한 - 기본 위치 대체", error);
+            processDistanceAndMap(DEFAULT_LAT, DEFAULT_LNG, posts, true);
+        },
+        { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
+    );
+
+    async function processDistanceAndMap(centerLat, centerLng, postsData, isDefault) {
+        try {
             const geocoder = new kakao.maps.services.Geocoder();
-            const distancePromises = posts.map(post => {
+            const distancePromises = postsData.map(post => {
                 return new Promise((resolve) => {
-                    // 구글 시트 헤더 명칭에 따라 post.address 또는 post.주소 등으로 맞춰주세요.
+                    // 구글 시트 주소 필드명 유연하게 매핑 (address, Address, 주소 모두 지원)
                     const address = post.address || post.Address || post.주소; 
                     if (!address) return resolve(null);
                     
@@ -544,7 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (status === kakao.maps.services.Status.OK) {
                             const spotLat = parseFloat(result[0].y);
                             const spotLng = parseFloat(result[0].x);
-                            const distance = calculateHaversine(userLat, userLng, spotLat, spotLng);
+                            const distance = calculateHaversine(centerLat, centerLng, spotLat, spotLng);
                             resolve({ ...post, lat: spotLat, lng: spotLng, distance: distance });
                         } else {
                             resolve(null); 
@@ -556,51 +570,50 @@ document.addEventListener('DOMContentLoaded', () => {
             const calculatedSpots = (await Promise.all(distancePromises)).filter(spot => spot !== null);
 
             if (calculatedSpots.length === 0) {
-                recommendContainer.innerHTML = `<div class="map-loading-msg">주소가 올바르게 등록된 액티비티가 없습니다.</div>`;
+                recommendContainer.innerHTML = `<div class="map-loading-msg">스프레드시트에 올바른 '주소(address)'가 입력된 액티비티가 없습니다.</div>`;
                 return;
             }
 
-            // 가장 가까운 순서대로 정렬 후 최단 거리 spot 추출
+            // 거리순 정렬 후 최단 거리 추출
             calculatedSpots.sort((a, b) => a.distance - b.distance);
             const closestSpot = calculatedSpots[0];
 
-            // 카카오 지도 레이아웃 그리기
+            // 카카오 지도 객체 레이아웃 바인딩
             const spotPosition = new kakao.maps.LatLng(closestSpot.lat, closestSpot.lng);
             const mapOption = { center: spotPosition, level: 5 };
             const map = new kakao.maps.Map(mapContainer, mapOption);
 
-            // 마커 및 말풍선 팝업
+            // 마커 생성
             const marker = new kakao.maps.Marker({ position: spotPosition, map: map });
             const infowindow = new kakao.maps.InfoWindow({
-                content: `<div style="padding:6px; font-size:11px; font-weight:700; color:#222; text-align:center; width:130px; border:none;">${closestSpot.title || closestSpot.제목}</div>`
+                content: `<div style="padding:6px; font-size:11px; font-weight:700; color:#222; text-align:center; width:130px;">${closestSpot.title || closestSpot.제목 || '추천 장소'}</div>`
             });
             infowindow.open(map, marker);
 
-            // 하단 추천 미니 카드 UI 업데이트
-            const distanceText = closestSpot.distance < 1 
+            // 거리 텍스트 포맷팅
+            let distanceText = closestSpot.distance < 1 
                 ? `${Math.round(closestSpot.distance * 1000)}m 앞` 
                 : `${closestSpot.distance.toFixed(1)}km 근처`;
 
+            let prefixTag = isDefault ? `📍 추천 액티비티` : `⚡ 현재 위치에서 ${distanceText}`;
             const imgUrl = closestSpot.image_url || closestSpot.이미지 || 'https://images.unsplash.com/photo-1489710437720-ebb67ec84dd2?w=100&q=80';
             const spotId = closestSpot.id || closestSpot.ID;
 
             recommendContainer.innerHTML = `
                 <div class="near-recommend-card" onclick="location.search = '?id=${spotId}'">
-                    <img src="${imgUrl}" alt="추천 상품 이미지">
+                    <img src="${imgUrl}" alt="추천">
                     <div class="info">
-                        <div class="distance-tag">⚡ 지금 내 위치에서 ${distanceText}</div>
+                        <div class="distance-tag" style="${isDefault ? 'color:#111;' : ''}">${prefixTag}</div>
                         <div class="place-name">${closestSpot.title || closestSpot.제목}</div>
                     </div>
                 </div>
             `;
-
-        }, (error) => {
-            console.error(error);
-            recommendContainer.innerHTML = `<div class="map-loading-msg">위치 권한을 허용하시면 가장 가까운 장소를 추천해 드려요.</div>`;
-        });
+        } catch (err) {
+            console.error("내부 지도 빌드 에러:", err);
+            recommendContainer.innerHTML = `<div class="map-loading-msg" style="color:red;">지도 구성 중 에러가 발생했습니다: ${err.message}</div>`;
+        }
     }
 
-    // 하버사인 거리 계산 수식
     function calculateHaversine(lat1, lon1, lat2, lon2) {
         const R = 6371; 
         const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -609,4 +622,4 @@ document.addEventListener('DOMContentLoaded', () => {
                   Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
         return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))); 
     }
-})();
+}
